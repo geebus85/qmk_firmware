@@ -1,18 +1,29 @@
+ /* Copyright 2022 Brian Low
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 2 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * You should have received a copy of the GNU General Public License
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
 #include QMK_KEYBOARD_H
 
 enum sofle_layers {
-    /* _M_XYZ = Mac Os, _W_XYZ = Win/Linux */
     _QWERTY,
-    _COLEMAK,
     _LOWER,
     _RAISE,
     _ADJUST,
 };
 
 enum custom_keycodes {
-    KC_QWERTY = SAFE_RANGE,
-    KC_COLEMAK,
-    KC_LOWER,
+    KC_LOWER = SAFE_RANGE,
     KC_RAISE,
     KC_ADJUST,
     KC_PRVWD,
@@ -108,129 +119,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
   [_ADJUST] = LAYOUT( \
   XXXXXXX, XXXXXXX, XXXXXXX,   XXXXXXX,    XXXXXXX, XXXXXXX,                       XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  RESET,   XXXXXXX, KC_QWERTY, KC_COLEMAK, CG_TOGG, XXXXXXX,                       XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  RESET,   XXXXXXX, XXXXXXX,   XXXXXXX, CG_TOGG, XXXXXXX,                       XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, CG_TOGG,   XXXXXXX,    XXXXXXX, XXXXXXX,                       XXXXXXX, KC_VOLD, KC_MUTE, KC_VOLU, XXXXXXX, XXXXXXX, \
   XXXXXXX, XXXXXXX, XXXXXXX,   XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX,     XXXXXXX, XXXXXXX, KC_MPRV, KC_MPLY, KC_MNXT, XXXXXXX, XXXXXXX, \
                     _______,   _______,    _______, _______, _______,     _______, _______, _______, _______, _______ \
   )
 };
-
-#ifdef RGB_MATRIX_ENABLE
-
-led_config_t g_led_config = { {
-  // Key Matrix to LED Index
-  { 28, 21, 20, 11, 10,      0 },
-  { 27, 22, 19, 12,  9,      1 },
-  { 26, 23, 18, 13,  8,      2 },
-  { 25, 24, 17, 14,  7,      3 },
-  { 16, 15,  6,  5,  4, NO_LED }
-}, {
-  // LED Index to Physical Position
-  { 195, 7 },{ 195, 21 },{ 195, 36 },{ 195, 50 },{ 224, 64 },
-  { 185, 62 },{ 146, 60 },{ 156, 48 },{ 156, 33 },{ 156, 19 },
-  { 156, 5 },{ 117, 3 },{ 117, 17 },{ 117, 31 },{ 117, 46 },
-  { 107, 62 },{ 68, 64 },{ 78, 48 },{ 78, 33 },{ 78, 19 },
-  { 78, 5 },{ 39, 7 },{ 39, 21 },{ 39, 36 },{ 39, 50 },
-  { 0, 50 },{ 0, 36 },{ 0, 21 },{ 0, 7 }
-}, {
-  // LED Index to Flag
-  1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1,
-  1, 1, 1, 1
-} };
-
-#endif
-
-#ifdef OLED_DRIVER_ENABLE
-
-static void render_logo(void) {
-    static const char PROGMEM qmk_logo[] = {
-        0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,0x88,0x89,0x8a,0x8b,0x8c,0x8d,0x8e,0x8f,0x90,0x91,0x92,0x93,0x94,
-        0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,0xb0,0xb1,0xb2,0xb3,0xb4,
-        0xc0,0xc1,0xc2,0xc3,0xc4,0xc5,0xc6,0xc7,0xc8,0xc9,0xca,0xcb,0xcc,0xcd,0xce,0xcf,0xd0,0xd1,0xd2,0xd3,0xd4,0
-    };
-
-    oled_write_P(qmk_logo, false);
-}
-
-static void print_status_narrow(void) {
-    // Print current mode
-    oled_write_P(PSTR("\n\n"), false);
-    oled_write_ln_P(PSTR("MODE"), false);
-    oled_write_ln_P(PSTR(""), false);
-    if (keymap_config.swap_lctl_lgui) {
-        oled_write_ln_P(PSTR("MAC"), false);
-    } else {
-        oled_write_ln_P(PSTR("WIN"), false);
-    }
-
-    switch (get_highest_layer(default_layer_state)) {
-        case _QWERTY:
-            oled_write_ln_P(PSTR("Qwrt"), false);
-            break;
-        case _COLEMAK:
-            oled_write_ln_P(PSTR("Clmk"), false);
-            break;
-        default:
-            oled_write_P(PSTR("Undef"), false);
-    }
-    oled_write_P(PSTR("\n\n"), false);
-    // Print current layer
-    oled_write_ln_P(PSTR("LAYER"), false);
-    switch (get_highest_layer(layer_state)) {
-        case _COLEMAK:
-        case _QWERTY:
-            oled_write_P(PSTR("Base\n"), false);
-            break;
-        case _RAISE:
-            oled_write_P(PSTR("Raise"), false);
-            break;
-        case _LOWER:
-            oled_write_P(PSTR("Lower"), false);
-            break;
-        case _ADJUST:
-            oled_write_P(PSTR("Adj\n"), false);
-            break;
-        default:
-            oled_write_ln_P(PSTR("Undef"), false);
-    }
-    oled_write_P(PSTR("\n\n"), false);
-    led_t led_usb_state = host_keyboard_led_state();
-    oled_write_ln_P(PSTR("CPSLK"), led_usb_state.caps_lock);
-}
-
-oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    if (is_keyboard_master()) {
-        return OLED_ROTATION_270;
-    }
-    return rotation;
-}
-
-void oled_task_user(void) {
-    if (is_keyboard_master()) {
-        print_status_narrow();
-    } else {
-        render_logo();
-    }
-}
-
-#endif
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case KC_QWERTY:
-            if (record->event.pressed) {
-                set_single_persistent_default_layer(_QWERTY);
-            }
-            return false;
-        case KC_COLEMAK:
-            if (record->event.pressed) {
-                set_single_persistent_default_layer(_COLEMAK);
-            }
-            return false;
         case KC_LOWER:
             if (record->event.pressed) {
                 layer_on(_LOWER);
@@ -274,7 +170,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     unregister_code(KC_LEFT);
                 }
             }
-            break;
+            return false;
         case KC_NXTWD:
              if (record->event.pressed) {
                 if (keymap_config.swap_lctl_lgui) {
@@ -293,11 +189,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     unregister_code(KC_RIGHT);
                 }
             }
-            break;
+            return false;
         case KC_LSTRT:
             if (record->event.pressed) {
                 if (keymap_config.swap_lctl_lgui) {
-                     //CMD-arrow on Mac, but we have CTL and GUI swapped
+                     // CMD-arrow on Mac, but we have CTL and GUI swapped
                     register_mods(mod_config(MOD_LCTL));
                     register_code(KC_LEFT);
                 } else {
@@ -311,11 +207,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     unregister_code(KC_HOME);
                 }
             }
-            break;
+            return false;
         case KC_LEND:
             if (record->event.pressed) {
                 if (keymap_config.swap_lctl_lgui) {
-                    //CMD-arrow on Mac, but we have CTL and GUI swapped
+                    // CMD-arrow on Mac, but we have CTL and GUI swapped
                     register_mods(mod_config(MOD_LCTL));
                     register_code(KC_RIGHT);
                 } else {
@@ -329,7 +225,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     unregister_code(KC_END);
                 }
             }
-            break;
+            return false;
         case KC_DLINE:
             if (record->event.pressed) {
                 register_mods(mod_config(MOD_LCTL));
@@ -338,9 +234,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 unregister_mods(mod_config(MOD_LCTL));
                 unregister_code(KC_BSPC);
             }
-            break;
+            return false;
         case KC_COPY:
             if (record->event.pressed) {
+                // CMD-c on Mac, but we have CTL and GUI swapped
                 register_mods(mod_config(MOD_LCTL));
                 register_code(KC_C);
             } else {
@@ -350,6 +247,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case KC_PASTE:
             if (record->event.pressed) {
+                // CMD-v on Mac, but we have CTL and GUI swapped
                 register_mods(mod_config(MOD_LCTL));
                 register_code(KC_V);
             } else {
@@ -359,6 +257,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case KC_CUT:
             if (record->event.pressed) {
+                // CMD-x on Mac, but we have CTL and GUI swapped
                 register_mods(mod_config(MOD_LCTL));
                 register_code(KC_X);
             } else {
@@ -366,9 +265,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 unregister_code(KC_X);
             }
             return false;
-            break;
+            return false;
         case KC_UNDO:
             if (record->event.pressed) {
+                // CMD-z on Mac, but we have CTL and GUI swapped
                 register_mods(mod_config(MOD_LCTL));
                 register_code(KC_Z);
             } else {
@@ -376,27 +276,93 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 unregister_code(KC_Z);
             }
             return false;
+        default:
+            return true;
     }
-    return true;
 }
 
-#ifdef ENCODER_ENABLE
+#ifdef OLED_ENABLE
 
-bool encoder_update_kb(uint8_t index, bool clockwise) {
-    if (index == 0) {
-        if (clockwise) {
-            tap_code(KC_VOLD);
+static void render_logo(void) {
+    static const char PROGMEM qmk_logo[] = {
+        0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F, 0x90, 0x91, 0x92, 0x93, 0x94,
+        0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xB0, 0xB1, 0xB2, 0xB3, 0xB4,
+        0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0x00
+    };
+
+    oled_write_P(qmk_logo, false);
+}
+
+void write_int_ln(const char* prefix, uint8_t value) {
+    oled_write_P(prefix, false);
+    oled_write(get_u8_str(value, ' '), false);
+}
+
+static void print_status_narrow(void) {
+    oled_write_ln_P(PSTR("SofleChoc _____"), false);
+
+    if (get_highest_layer(layer_state) == _ADJUST) {
+        uint8_t mode  = rgb_matrix_get_mode();
+        HSV     hsv   = rgb_matrix_get_hsv();
+        uint8_t speed = rgb_matrix_get_speed();
+
+        if (keymap_config.swap_lctl_lgui) {
+            oled_write_ln_P(PSTR("MAC\n"), false);
         } else {
-            tap_code(KC_VOLU);
+            oled_write_ln_P(PSTR("WIN\n"), false);
         }
-    } else if (index == 1) {
-        if (clockwise) {
-            tap_code(KC_PGDOWN);
+
+        oled_write_ln("RGB", false);
+        write_int_ln(PSTR("Mo"), mode);
+        write_int_ln(PSTR("H "), hsv.h);
+        write_int_ln(PSTR("S "), hsv.s);
+        write_int_ln(PSTR("V "), hsv.v);
+        write_int_ln(PSTR("Sp"), speed);
+        oled_write_P(PSTR("\n\n\n"), false);
+    } else {
+        oled_write_P(PSTR("\n\n\n\n\n\n\n\n\n"), false);
+        led_t led_usb_state = host_keyboard_led_state();
+        if (led_usb_state.caps_lock) {
+            oled_write_ln_P(PSTR(" CAP "), true);
         } else {
-            tap_code(KC_PGUP);
+            oled_write_ln_P(PSTR("     "), false);
         }
     }
-    return true;
+
+    // Print current layer
+    switch (get_highest_layer(layer_state)) {
+        case _QWERTY:
+            oled_write_P(PSTR("Alpha"), false);
+            break;
+        case _LOWER:
+            oled_write_P(PSTR("Sym  "), false);
+            break;
+        case _RAISE:
+            oled_write_P(PSTR("Nav  "), false);
+            break;
+        case _ADJUST:
+            oled_write_P(PSTR("Adj  "), false);
+            break;
+        default:
+            oled_write_P(PSTR("???  "), false);
+    }
+}
+
+oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+    if (is_keyboard_master()) {
+        return OLED_ROTATION_270;
+    }
+    return rotation;
+}
+
+bool oled_task_user(void) {
+    if (is_keyboard_master()) {
+        print_status_narrow();
+    } else {
+        render_logo();
+    }
+
+    return false;
 }
 
 #endif
